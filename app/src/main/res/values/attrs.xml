@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomCalendarView">
+        <attr name="titleTextSize" format="dimension"/>
+        <attr name="titleTextColor" format="color"/>
+        <attr name="weekdayTextSize" format="dimension"/>
+        <attr name="weekdayTextColor" format="color"/>
+        <attr name="dayTextSize" format="dimension"/>
+        <attr name="dayTextColor" format="color"/>
+        <attr name="selectedDayBackgroundColor" format="color"/>
+        <attr name="todayTextColor" format="color"/>
+        <attr name="selectedBorderWidth" format="dimension"/>
+        <attr name="cellHeight" format="dimension"/>
+        <attr name="headerHeight" format="dimension"/>
+        <attr name="weekdayRowHeight" format="dimension"/>
+    </declare-styleable>
+</resources>

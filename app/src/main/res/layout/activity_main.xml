@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <com.example.myapplication.customcalendarviewdemo.calendar.CustomCalendarView
+        android:id="@+id/calendar_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:titleTextSize="18sp"
+        app:titleTextColor="#000000"
+        app:weekdayTextSize="14sp"
+        app:weekdayTextColor="#666666"
+        app:dayTextSize="14sp"
+        app:dayTextColor="#000000"
+        app:selectedDayBackgroundColor="#FFB6C1"
+        app:todayTextColor="#FF4500"
+        app:selectedBorderWidth="2dp"
+        app:headerHeight="50dp"
+        app:weekdayRowHeight="40dp"
+        app:cellHeight="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
