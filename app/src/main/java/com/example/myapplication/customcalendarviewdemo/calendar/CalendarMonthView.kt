@@ -2,13 +2,12 @@ package com.example.myapplication.customcalendarviewdemo.calendar
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ViewGroup
 import java.util.Calendar
+import kotlin.math.min
 
 /**
  * 日历月视图
@@ -39,16 +38,10 @@ class CalendarMonthView @JvmOverloads constructor(
     // 日期单元格视图
     private val dayCells = mutableListOf<CalendarDayView>()
     
-    // 星期文本绘制工具
-    private val weekdayPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    
     // 单元格大小
     private var cellWidth: Float = 0f
     private var cellHeight: Float = 0f
-    
-    // 星期标题
-    private val weekdays = arrayOf("周日", "周一", "周二", "周三", "周四", "周五", "周六")
-    
+
     // 日期点击回调
     private var onDayClickListener: ((year: Int, month: Int, day: Int) -> Unit)? = null
     
@@ -58,10 +51,11 @@ class CalendarMonthView @JvmOverloads constructor(
         
         override fun onSingleTapUp(e: MotionEvent): Boolean {
             // 忽略星期行
-            if (e.y < (calendarAttrs?.weekdayRowHeight ?: 0f)) return false
+//            if (e.y < (calendarAttrs?.weekdayRowHeight ?: 0f)) return false
             
             // 计算点击的行列
-            val row = ((e.y - (calendarAttrs?.weekdayRowHeight ?: 0f)) / cellHeight).toInt()
+//            val row = ((e.y - (calendarAttrs?.weekdayRowHeight ?: 0f)) / cellHeight).toInt()
+            val row = (e.y  / cellHeight).toInt()
             val col = (e.x / cellWidth).toInt()
             
             // 计算点击的日期索引
@@ -88,12 +82,7 @@ class CalendarMonthView @JvmOverloads constructor(
         val day: Int,
         val isCurrentMonth: Boolean
     )
-    
-    init {
-        setWillNotDraw(false)
-        // 初始化绘制工具
-        weekdayPaint.textAlign = Paint.Align.CENTER
-    }
+
     
     /**
      * 设置月份数据
@@ -230,11 +219,10 @@ class CalendarMonthView @JvmOverloads constructor(
      */
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        
         // 计算单元格大小
         cellWidth = w / 7f
-        cellHeight = (h - (calendarAttrs?.weekdayRowHeight ?: 0f)) / 6f
-        
+        cellHeight = cellWidth
+
         requestLayout()
     }
     
@@ -247,8 +235,10 @@ class CalendarMonthView @JvmOverloads constructor(
         
         // 计算单元格大小
         cellWidth = width / 7f
-        cellHeight = (height - (calendarAttrs?.weekdayRowHeight ?: 0f)) / 6f
-        
+        cellHeight = cellWidth
+
+        val totalHeight = cellHeight * 6
+
         // 测量日期单元格
         val cellWidthSpec = MeasureSpec.makeMeasureSpec(cellWidth.toInt(), MeasureSpec.EXACTLY)
         val cellHeightSpec = MeasureSpec.makeMeasureSpec(cellHeight.toInt(), MeasureSpec.EXACTLY)
@@ -257,50 +247,32 @@ class CalendarMonthView @JvmOverloads constructor(
             dayCell.measure(cellWidthSpec, cellHeightSpec)
         }
         
-        setMeasuredDimension(width, height)
+        setMeasuredDimension(width, totalHeight.toInt())
     }
     
     /**
      * 布局子视图
      */
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        //计算正方形单元格的大小(取宽度方向的七分之一)
+        val cellSize = width / 7f
+        //单元格间距
+        val padding = cellSize * 0.05f
+
         // 布局日期单元格
         for (i in dayCells.indices) {
             if (i >= daysInMonth.size) break
             
             val row = i / 7
             val col = i % 7
-            
-            val left = (col * cellWidth).toInt()
-            val top = ((calendarAttrs?.weekdayRowHeight ?: 0f) + row * cellHeight).toInt()
-            val right = ((col + 1) * cellWidth).toInt()
-            val bottom = ((calendarAttrs?.weekdayRowHeight ?: 0f) + (row + 1) * cellHeight).toInt()
-            
+
+            val left = (col * cellSize + padding).toInt()
+            val top = (row * cellSize + padding).toInt()
+            val right = ((col + 1) * cellSize - padding).toInt()
+            val bottom = ((row + 1) * cellSize - padding).toInt()
+
             dayCells[i].layout(left, top, right, bottom)
         }
     }
-    
-    /**
-     * 绘制视图
-     */
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        
-        calendarAttrs?.let { attrs ->
-            // 设置星期文本样式
-            weekdayPaint.textSize = attrs.weekdayTextSize /** resources.displayMetrics.density*/
-            weekdayPaint.color = attrs.weekdayTextColor
-            
-            // 绘制星期行
-            val weekdayY = attrs.weekdayRowHeight / 2f + (weekdayPaint.descent() - weekdayPaint.ascent()) / 2f - weekdayPaint.descent()
-            for (i in 0 until 7) {
-                canvas.drawText(
-                    weekdays[i],
-                    cellWidth * i + cellWidth / 2f,
-                    weekdayY,
-                    weekdayPaint
-                )
-            }
-        }
-    }
+
 }

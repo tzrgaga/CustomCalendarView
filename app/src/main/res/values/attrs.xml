@@ -7,6 +7,7 @@
         <attr name="weekdayTextColor" format="color"/>
         <attr name="dayTextSize" format="dimension"/>
         <attr name="dayTextColor" format="color"/>
+        <attr name="dayBgColor" format="color"/>
         <attr name="selectedDayBackgroundColor" format="color"/>
         <attr name="todayTextColor" format="color"/>
         <attr name="selectedBorderWidth" format="dimension"/>

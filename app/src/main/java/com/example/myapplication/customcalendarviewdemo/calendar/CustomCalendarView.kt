@@ -1,6 +1,7 @@
 package com.example.myapplication.customcalendarviewdemo.calendar
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.ViewGroup
@@ -18,12 +19,13 @@ data class CalendarViewAttrs(
     var weekdayTextColor: Int = Color.GRAY,
     var dayTextSize: Float = 14f,
     var dayTextColor: Int = Color.BLACK,
+    var dayBgColor: Int = Color.WHITE,
     var selectedDayBackgroundColor: Int = Color.rgb(255, 192, 203),//浅粉色
     var todayTextColor: Int = Color.BLACK,
     var selectedBorderWidth: Float = 2f,
-    var cellHeight: Float = 40f,
+    var cellHeight: Float = 45f,
     var headerHeight: Float = 50f,
-    var weekdayRowHeight: Float = 40f,
+    var weekdayRowHeight: Float = 32f,
 )
 
 /**
@@ -39,6 +41,8 @@ class CustomCalendarView @JvmOverloads constructor(
     private val attrs = CalendarViewAttrs()
 
     private val titleView: CalendarTitleView
+
+    private val weekdayHeaderView:CalendarWeekdayHeaderView
 
     //日历页面
     private val calendarPager: ViewPager2
@@ -67,6 +71,12 @@ class CustomCalendarView @JvmOverloads constructor(
         }
         addView(titleView)
 
+        //初始化星期标题
+        weekdayHeaderView = CalendarWeekdayHeaderView(context).apply {
+            calendarAttrs = this@CustomCalendarView.attrs
+        }
+        addView(weekdayHeaderView)
+
         // 初始化ViewPager
         calendarPager = ViewPager2(context).apply {
             adapter = CalendarPagerAdapter().apply {
@@ -84,7 +94,7 @@ class CustomCalendarView @JvmOverloads constructor(
                     updateDisplayDate(monthDiff)
                 }
             })
-            setPageTransformer(MarginPageTransformer(20))
+            setPageTransformer(MarginPageTransformer(100))
         }
         addView(calendarPager)
 
@@ -97,25 +107,27 @@ class CustomCalendarView @JvmOverloads constructor(
      */
     private fun parseAttributes(attrs: AttributeSet?) {
         if (attrs == null) return
-
-        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.CustomCalendarView)
-
-        with(this.attrs) {
-            titleTextSize = typedArray.getDimension(R.styleable.CustomCalendarView_titleTextSize, titleTextSize)
-            titleTextColor = typedArray.getColor(R.styleable.CustomCalendarView_titleTextColor, titleTextColor)
-            weekdayTextSize = typedArray.getDimension(R.styleable.CustomCalendarView_weekdayTextSize, weekdayTextSize)
-            weekdayTextColor = typedArray.getColor(R.styleable.CustomCalendarView_weekdayTextColor, weekdayTextColor)
-            dayTextSize = typedArray.getDimension(R.styleable.CustomCalendarView_dayTextSize, dayTextSize)
-            dayTextColor = typedArray.getColor(R.styleable.CustomCalendarView_dayTextColor, dayTextColor)
-            selectedDayBackgroundColor = typedArray.getColor(R.styleable.CustomCalendarView_selectedDayBackgroundColor, selectedDayBackgroundColor)
-            todayTextColor = typedArray.getColor(R.styleable.CustomCalendarView_todayTextColor, todayTextColor)
-            selectedBorderWidth = typedArray.getDimension(R.styleable.CustomCalendarView_selectedBorderWidth, selectedBorderWidth)
-            cellHeight = typedArray.getDimension(R.styleable.CustomCalendarView_cellHeight, cellHeight)
-            headerHeight = typedArray.getDimension(R.styleable.CustomCalendarView_headerHeight, headerHeight)
-            weekdayRowHeight = typedArray.getDimension(R.styleable.CustomCalendarView_weekdayRowHeight, weekdayRowHeight)
+        var typedArray:TypedArray? =null
+        try {
+            typedArray = context.obtainStyledAttributes(attrs, R.styleable.CustomCalendarView)
+            with(this.attrs) {
+                titleTextSize = typedArray.getDimension(R.styleable.CustomCalendarView_titleTextSize, titleTextSize)
+                titleTextColor = typedArray.getColor(R.styleable.CustomCalendarView_titleTextColor, titleTextColor)
+                weekdayTextSize = typedArray.getDimension(R.styleable.CustomCalendarView_weekdayTextSize, weekdayTextSize)
+                weekdayTextColor = typedArray.getColor(R.styleable.CustomCalendarView_weekdayTextColor, weekdayTextColor)
+                dayTextSize = typedArray.getDimension(R.styleable.CustomCalendarView_dayTextSize, dayTextSize)
+                dayTextColor = typedArray.getColor(R.styleable.CustomCalendarView_dayTextColor, dayTextColor)
+                dayBgColor = typedArray.getColor(R.styleable.CustomCalendarView_dayBgColor, dayBgColor)
+                selectedDayBackgroundColor = typedArray.getColor(R.styleable.CustomCalendarView_selectedDayBackgroundColor, selectedDayBackgroundColor)
+                todayTextColor = typedArray.getColor(R.styleable.CustomCalendarView_todayTextColor, todayTextColor)
+                selectedBorderWidth = typedArray.getDimension(R.styleable.CustomCalendarView_selectedBorderWidth, selectedBorderWidth)
+                cellHeight = typedArray.getDimension(R.styleable.CustomCalendarView_cellHeight, cellHeight)
+                headerHeight = typedArray.getDimension(R.styleable.CustomCalendarView_headerHeight, headerHeight)
+                weekdayRowHeight = typedArray.getDimension(R.styleable.CustomCalendarView_weekdayRowHeight, weekdayRowHeight)
+            }
+        } finally {
+            typedArray?.recycle()
         }
-
-        typedArray.recycle()
     }
 
     /**
@@ -124,17 +136,26 @@ class CustomCalendarView @JvmOverloads constructor(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val width = MeasureSpec.getSize(widthMeasureSpec)
 
+        //计算单元格大小为正方形
+        val cellSize = width / 7f
+
         // 计算日历总高度 = 标题高度 + 星期行高度 + 6行日期高度(最多6行)
-        val totalHeight = attrs.headerHeight + attrs.weekdayRowHeight + (6 * attrs.cellHeight)
+        val totalHeight = attrs.headerHeight + attrs.weekdayRowHeight + (6 * cellSize)
 
         // 测量标题栏
         val titleWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
         val titleHeightSpec = MeasureSpec.makeMeasureSpec(attrs.headerHeight.toInt(), MeasureSpec.EXACTLY)
         titleView.measure(titleWidthSpec, titleHeightSpec)
 
+        //测量星期标题
+        val weekdayHeaderWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
+        val weekdayHeaderHeightSpec = MeasureSpec.makeMeasureSpec(attrs.weekdayRowHeight.toInt(),MeasureSpec.EXACTLY)
+        weekdayHeaderView.measure(weekdayHeaderWidthSpec,weekdayHeaderHeightSpec)
+
         // 测量日历页面
         val pagerWidth = width
-        val pagerHeight = (totalHeight - attrs.headerHeight).toInt()
+        // 使用6行正方形单元格的高度
+        val pagerHeight = (cellSize * 6).toInt()
         val pagerWidthSpec = MeasureSpec.makeMeasureSpec(pagerWidth, MeasureSpec.EXACTLY)
         val pagerHeightSpec = MeasureSpec.makeMeasureSpec(pagerHeight, MeasureSpec.EXACTLY)
         calendarPager.measure(pagerWidthSpec, pagerHeightSpec)
@@ -152,12 +173,20 @@ class CustomCalendarView @JvmOverloads constructor(
         // 布局标题栏
         titleView.layout(0, 0, titleView.measuredWidth, titleView.measuredHeight)
 
+        //星期标题栏
+        weekdayHeaderView.layout(
+            0,
+            titleView.measuredHeight,
+            weekdayHeaderView.measuredWidth,
+            titleView.measuredHeight + weekdayHeaderView.measuredHeight
+        )
+
         // 布局日历页面
         calendarPager.layout(
             0,
-            titleView.measuredHeight,
+            titleView.measuredHeight + weekdayHeaderView.measuredHeight,
             calendarPager.measuredWidth,
-            titleView.measuredHeight + calendarPager.measuredHeight
+            titleView.measuredHeight + weekdayHeaderView.measuredHeight + calendarPager.measuredHeight
         )
     }
 
@@ -189,6 +218,20 @@ class CustomCalendarView @JvmOverloads constructor(
      */
     private fun navigateToNextMonth() {
         calendarPager.currentItem += 1
+    }
+
+    fun navigateToToday() {
+        val today = Calendar.getInstance()
+        val year = today.get(Calendar.YEAR)
+        val month = today.get(Calendar.MONTH)
+        val day = today.get(Calendar.DAY_OF_MONTH)
+
+        setDate(year, month, day)
+
+        calendarPager.setCurrentItem(Int.MAX_VALUE/2,true)
+
+        onDateSelectedListener?.invoke(year, month, day)
+
     }
 
     /**
@@ -259,11 +302,6 @@ class CustomCalendarView @JvmOverloads constructor(
                     holder.calendarMonthView.clearSelectedDay()
                 }
             } ?: holder.calendarMonthView.clearSelectedDay()
-
-            // 如果是当前显示的月份，标记选中日期
-//            if (monthDiff == calendarPager.currentItem - (Int.MAX_VALUE / 2)) {
-//                holder.calendarMonthView.setSelectedDay(currentDate.get(Calendar.DAY_OF_MONTH))
-//            }
         }
 
         override fun getItemCount(): Int = Int.MAX_VALUE

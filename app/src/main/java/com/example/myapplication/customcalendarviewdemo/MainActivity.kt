@@ -1,6 +1,7 @@
 package com.example.myapplication.customcalendarviewdemo
 
 import android.os.Bundle
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -43,6 +44,10 @@ class MainActivity : AppCompatActivity() {
                 today.get(Calendar.MONTH),
                 today.get(Calendar.DAY_OF_MONTH)
             )
+        }
+
+        findViewById<TextView>(R.id.return_today).setOnClickListener {
+            calendarView.navigateToToday()
         }
 
     }

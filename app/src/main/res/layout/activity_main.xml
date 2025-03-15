@@ -15,7 +15,7 @@
         app:titleTextSize="18sp"
         app:titleTextColor="#000000"
         app:weekdayTextSize="14sp"
-        app:weekdayTextColor="#666666"
+        app:weekdayTextColor="#888888"
         app:dayTextSize="14sp"
         app:dayTextColor="#000000"
         app:selectedDayBackgroundColor="#FFB6C1"
@@ -24,7 +24,26 @@
         app:headerHeight="50dp"
         app:weekdayRowHeight="40dp"
         app:cellHeight="40dp"
+        android:background="#F9FAFB"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/return_today"
+        app:drawableTopCompat="@drawable/return_to_today"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/calendar_view"
+        android:layout_marginEnd="16dp"
+        android:text="今天"
+        android:drawablePadding="4dp"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#FF4500"
+        android:padding="6dp"
+        android:background="?selectableItemBackgroundBorderless"
+        app:layout_constraintVertical_bias="0.8"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
